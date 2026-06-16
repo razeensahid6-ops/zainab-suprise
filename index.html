@@ -220,6 +220,7 @@
     .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(39, 53, 47, 0.25); }
     .btn:active { transform: translateY(0); }
     .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+    .btn:disabled { cursor: not-allowed; opacity: .48; transform: none; box-shadow: none; }
     .btn.gold { color: #3c3020; background: var(--gold); }
     .btn.pink { background: var(--pink-dark); }
 
@@ -481,6 +482,56 @@
       transform: rotate(9deg);
     }
 
+    /* Embarrassing moment checkpoint */
+    .moment-card {
+      width: min(820px, 100%);
+      max-width: 820px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .video-frame {
+      margin: 28px 0 22px;
+      padding: 12px;
+      overflow: hidden;
+      background: white;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      transform: rotate(-0.7deg);
+    }
+
+    .video-frame video {
+      display: block;
+      width: 100%;
+      max-height: 68vh;
+      background: #111;
+      border-radius: 16px;
+    }
+
+    .video-note {
+      min-height: 22px;
+      margin: 12px 0 0;
+      color: var(--pink-dark);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .watch-progress {
+      height: 8px;
+      overflow: hidden;
+      background: rgba(39, 53, 47, .1);
+      border-radius: 999px;
+    }
+
+    .watch-progress span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--pink), var(--gold), var(--mint));
+      border-radius: inherit;
+      transition: width .2s linear;
+    }
+
     .hidden { display: none !important; }
 
     /* Vault and letter */
@@ -663,6 +714,23 @@
             <div class="caption" id="caption">the soft smile</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="moment" aria-labelledby="moment-title">
+      <div class="card moment-card">
+        <p class="eyebrow">Mandatory checkpoint</p>
+        <h2 id="moment-title">The embarrassing moment.</h2>
+        <p class="subtext">To continue, this must be watched from start to finish at full player volume. No skipping. No muting. Very official.</p>
+        <div class="video-frame">
+          <video id="embarrassing-video" controls controlsList="nodownload noplaybackrate" disablePictureInPicture playsinline preload="metadata">
+            <source src="assets/embarrassing-moment.mp4" type="video/mp4">
+            Your browser does not support this video.
+          </video>
+        </div>
+        <div class="watch-progress" aria-label="Video watch progress"><span id="watch-progress"></span></div>
+        <p class="video-note" id="video-note">Press play when you are ready for the evidence.</p>
+        <button class="btn gold" id="continue-to-vault" disabled>Continue to The Vault <span>→</span></button>
       </div>
     </section>
 
@@ -884,7 +952,76 @@
       if (photoClicks >= 5) vaultButton.classList.remove("hidden");
     });
 
-    vaultButton.addEventListener("click", () => show("vault"));
+    vaultButton.addEventListener("click", () => {
+      show("moment");
+      prepareEmbarrassingMoment();
+    });
+
+    // Embarrassing moment checkpoint
+    const embarrassingVideo = document.querySelector("#embarrassing-video");
+    const continueToVault = document.querySelector("#continue-to-vault");
+    const videoNote = document.querySelector("#video-note");
+    const watchProgress = document.querySelector("#watch-progress");
+    let furthestWatched = 0;
+    let videoUnlocked = false;
+
+    function enforceFullPlayerVolume() {
+      try {
+        embarrassingVideo.muted = false;
+        embarrassingVideo.volume = 1;
+      } catch (error) {
+        // Some mobile browsers do not allow script control of hardware/player volume.
+      }
+
+      if (embarrassingVideo.muted || embarrassingVideo.volume < 0.99) {
+        videoNote.textContent = "Full player volume only. Nice try.";
+      }
+    }
+
+    function prepareEmbarrassingMoment() {
+      enforceFullPlayerVolume();
+      if (!videoUnlocked) {
+        continueToVault.disabled = true;
+        videoNote.textContent = "Press play when you are ready for the evidence.";
+      }
+    }
+
+    embarrassingVideo.addEventListener("play", () => {
+      enforceFullPlayerVolume();
+      if (!videoUnlocked) videoNote.textContent = "Watching in progress. No skipping allowed.";
+    });
+
+    embarrassingVideo.addEventListener("volumechange", enforceFullPlayerVolume);
+
+    embarrassingVideo.addEventListener("timeupdate", () => {
+      if (!embarrassingVideo.duration) return;
+      if (embarrassingVideo.currentTime > furthestWatched + 1.1 && !videoUnlocked) {
+        embarrassingVideo.currentTime = furthestWatched;
+        videoNote.textContent = "No skipping. The embarrassing moment demands respect.";
+        return;
+      }
+      furthestWatched = Math.max(furthestWatched, embarrassingVideo.currentTime);
+      watchProgress.style.width = `${Math.min((furthestWatched / embarrassingVideo.duration) * 100, 100)}%`;
+    });
+
+    embarrassingVideo.addEventListener("seeking", () => {
+      if (!videoUnlocked && embarrassingVideo.currentTime > furthestWatched + 1.1) {
+        embarrassingVideo.currentTime = furthestWatched;
+      }
+    });
+
+    embarrassingVideo.addEventListener("ended", () => {
+      videoUnlocked = true;
+      watchProgress.style.width = "100%";
+      continueToVault.disabled = false;
+      videoNote.textContent = "Evidence accepted. The Vault may now be opened.";
+      launchConfetti();
+    });
+
+    continueToVault.addEventListener("click", () => {
+      if (!videoUnlocked) return;
+      show("vault");
+    });
 
     // Final vault
     const vaultForm = document.querySelector("#vault-form");
