@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Birthday Website Server",
+            "type": "process",
+            "command": "node",
+            "args": [
+                "${workspaceFolder}/scripts/start-server.mjs"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "birthday-server",
+                "pattern": {
+                    "regexp": "^(.*)$",
+                    "message": 1
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Starting birthday website server",
+                    "endsPattern": "^Birthday website ready"
+                }
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated"
+            }
+        }
+    ]
+}
