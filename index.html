@@ -430,12 +430,16 @@
 
     .photo-wrap {
       position: relative;
+      width: min(100%, 470px);
       max-width: 470px;
       margin: auto;
+      min-width: 0;
     }
 
     .polaroid {
-      padding: 14px 14px 64px;
+      display: grid;
+      gap: 13px;
+      padding: 14px;
       background: white;
       box-shadow: var(--shadow);
       transform: rotate(1.5deg);
@@ -449,6 +453,7 @@
     }
 
     .photo-window img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -458,15 +463,15 @@
     .photo-window img.changing { opacity: 0; transform: scale(.98); }
 
     .caption {
-      position: absolute;
-      right: 32px;
-      bottom: 18px;
-      left: 32px;
+      min-height: 42px;
       color: var(--muted);
       font-family: "Playfair Display", serif;
+      font-size: clamp(0.98rem, 2.5vw, 1.1rem);
       font-style: italic;
       text-align: right;
-      line-height: 1.2;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+      text-wrap: balance;
     }
 
     .counter {
@@ -610,15 +615,32 @@
       .hero, .gallery-layout { grid-template-columns: 1fr; }
       .hero-copy { order: 2; text-align: center; padding-top: 0; }
       .hero-copy .eyebrow { justify-content: center; }
-      .portrait-stack { min-height: 380px; }
-      .portrait-main { inset: 16px 25px 15px; border-width: 9px; border-bottom-width: 45px; }
-      .sticker { width: 82px; height: 82px; right: 8px; font-size: 1rem; }
+      .portrait-stack { width: min(100%, 390px); min-height: auto; aspect-ratio: 4 / 5; margin: 0 auto; }
+      .portrait-main { inset: 14px 20px 16px; border-width: 9px; border-bottom-width: 42px; }
+      .tape { top: 4px; right: 14px; width: 92px; height: 28px; }
+      .sticker { width: 76px; height: 76px; right: 6px; bottom: 16px; font-size: .95rem; }
       .gallery-copy { text-align: center; }
       .gallery-copy .eyebrow { justify-content: center; }
       .gallery-actions { justify-content: center; }
+      .photo-wrap { width: min(100%, 390px); padding-top: 10px; }
+      .polaroid { gap: 11px; padding: 11px; transform: rotate(.6deg); }
+      .photo-window { aspect-ratio: 4 / 5; }
+      .caption { min-height: auto; text-align: center; line-height: 1.3; }
+      .counter { top: -5px; right: -5px; width: 48px; height: 48px; border-width: 4px; font-size: .9rem; }
       .quiz-top { align-items: flex-start; }
       .card { padding: 28px 22px; }
       .option:hover { transform: none; }
+    }
+
+    @media (max-width: 430px) {
+      main { width: min(100% - 18px, 560px); }
+      .gallery-layout { gap: 24px; }
+      .gallery-actions .btn { width: 100%; }
+      .photo-wrap { width: min(100%, 330px); }
+      .counter { right: 2px; }
+      .portrait-stack { width: min(100%, 330px); }
+      .portrait-main { inset: 12px 15px 14px; transform: rotate(1.5deg); }
+      .sticker { right: 0; bottom: 12px; transform: rotate(-8deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
